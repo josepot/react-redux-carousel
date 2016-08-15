@@ -1,3 +1,8 @@
+ul, li {
+  list-style-type: none;
+  margin: auto;
+  padding: 0;
+}
 .carousel {
   position: relative;
   overflow: hidden;
@@ -10,40 +15,39 @@
   background-color: blue;
 }
 
-.carousel ul {
-  display: block;
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-}
-
-.carousel ul li {
-  display: block;
-  margin: 0;
-  padding:0;
+.circle.selected {
+  background-color: orange;
 }
 
 .carousel .slidesArea {
   overflow: hidden;
 }
-
-.carousel .slidesArea ul {
-  position: relative;
-  overflow: hidden;
-}
-
 .carousel .slidesArea > * {
   float: left;
 }
 
-.carousel .slidesArea ul li {
-  position: absolute;
-  top: 0;
-  left: 0;
-  transition-timing-function: linear;
+.carousel .slidesArea .slidesViewPort {
+  position: relative;
+  overflow: hidden;
 }
 
-.carousel .slidesArea ul li img {
+.carousel .slidesArea .slidesViewPort ul, .carousel .slidesArea .viewPort ul li {
+  display: block;
+  padding: 0;
+  margin: 0;
+}
+
+.carousel .slidesArea .slidesViewPort ul {
+  position: relative;
+  transition-duration: 0.5s;
+  transition-timing-function: ease-in;
+}
+
+.carousel .slidesArea .slidesViewPort ul li {
+  position: absolute;
+}
+
+.carousel .slidesArea .slidesViewPort ul li img {
   width: 100%;
 }
 

@@ -1,28 +1,18 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
+import React from 'react';
+import R from 'ramda';
+import { connect } from 'react-redux';
 import './App.css';
 import Carousel from './components/carousel';
 
-const slides = [
-  'https://www.newton.ac.uk/files/covers/968361.jpg',
-  'https://www.wired.com/images_blogs/wiredscience/2012/06/pi-walk-660x516.jpg',
-  'http://images5.fanpop.com/image/photos/30400000/World-map-random-30415186-1280-1024.jpg',
-  'https://i.ytimg.com/vi/_EL6hcIP5ec/maxresdefault.jpg'
-];
+const App = ({ carousels }) => (
+  <div className="App">
+    {
+      carousels.map(({ id, slides, width, height }) => (
+        <Carousel key={id} instanceId={id}
+          width={width} height={height} slidesSrc={slides} />
+      ))
+    }
+  </div>
+);
 
-
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
-        </div>
-        <Carousel instanceId={'id1'} width={300} height={150} slides={slides} />
-      </div>
-    );
-  }
-}
-
-export default App;
+export default connect(R.pick(['carousels']))(App);

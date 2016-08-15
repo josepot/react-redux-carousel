@@ -1,46 +1,48 @@
 import R from 'ramda';
 import React from 'react';
-import connector from './connector';
+import { lifecycle } from 'recompose';
+import connect from 'react-redux-internal-state';
 
-import reducer, { INITIAL_STATE } from './reducers';
+import { actionCreators } from './actions';
+import stateToProps from './queries/state-to-props';
+import reducer from './reducers';
+import initialState from './reducers/initial-state';
 import './styles.css';
 
 const carousel = ({
-  relevantSlides, nSlides, activeSlide,
-  styles: { arrowButton, container, slideButtons, slidesContainer },
-  onTransitionEnd, onMoveTo, onNext, onPrev,
+  slides, activeSlide,
+  styles: {
+    arrowButton, container, slideButtons, slidesViewPort, slidesContainer,
+  },
+  onDimensionsUpdate, onMoveTo, onNext, onPrev, onSlidesUpdate, onTransitionEnd,
 }) => (
   <div className="carousel" style={ container }>
     <div className="slidesArea">
-      <div onClick={ onNext } className="circle" style={ arrowButton }>
+      <div onClick={ onPrev } className="circle" style={ arrowButton }>
         &larr;
       </div>
-        <ul style={ slidesContainer }>
+      <div className="slidesViewPort" style={ slidesViewPort }>
+        <ul style={ slidesContainer } onTransitionEnd={ onTransitionEnd }>
         {
-          relevantSlides.map(({ src, id, style, alt }, idx) =>
-            <li
-              style={ style }
-              key={ idx }
-              onTransitionEnd={
-                () => style.left === '0px' && onTransitionEnd()
-              }
-            >
-              <img src={ src } alt={ alt }/>
+          slides.map(({ src, id, style, alt }, idx) =>
+            <li style={ style } key={ idx }>
+              <img src={ src } alt={ alt } style={ R.pick(['width', 'height'], style) } />
             </li>
           )
         }
         </ul>
-      <div onClick={ onPrev } className="circle" style={ arrowButton }>
+      </div>
+      <div onClick={ onNext } className="circle" style={ arrowButton }>
         &rarr;
       </div>
     </div>
     <ul className="slideButtons" style={ slideButtons.area }>
       {
-        R.range(0, nSlides).map(id =>
+        slides.map(({ id }) =>
           <li
             key={ id }
-            className="circle"
-            onClick={ () => id !== activeSlide && onMoveTo(id, id > activeSlide ? 1 : -1) }
+            className={ 'circle' + (id === activeSlide? ' selected' : '') }
+            onClick={ () => id !== activeSlide && onMoveTo(id) }
             style={ slideButtons.button }>
           </li>
         )
@@ -49,7 +51,24 @@ const carousel = ({
   </div>
 );
 
-export default connector(
-  carousel, 'carousel', reducer,
-  ({ slides }) => R.assoc('nSlides', slides.length, INITIAL_STATE)
+const carouselEnhanced = lifecycle({
+  componentWillReceiveProps({ width, height, slidesSrc }) {
+    if (!R.equals(slidesSrc, this.props.slidesSrc)) {
+      this.props.onSlidesUpdate(slidesSrc);
+    }
+
+    if (width !== this.props.width || height !== this.props.height) {
+      this.props.onDimensionsUpdate({ width, height });
+    }
+  }
+})(carousel);
+
+export default connect(stateToProps, actionCreators)(
+  carouselEnhanced,
+  'carousel',
+  reducer,
+  ({ slidesSrc, width, height }) => R.merge(initialState, {
+    slides: slidesSrc,
+    dimensions: { width, height },
+  })
 );
